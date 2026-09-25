@@ -25,6 +25,21 @@ test('Shanghai shows scheduled fixtures without fabricated scores', async ({ pag
   await expect(page.locator('.detail-score__value')).toHaveText('— : —');
 });
 
+test('event artwork and Ukrainian display font load for both tournaments', async ({ page, request }) => {
+  for (const [route, image] of [
+    ['/', 'champions-paris-riot.webp'],
+    ['/?tournament=shanghai-2026', 'champions-shanghai-riot.webp']
+  ]) {
+    await page.goto(route);
+    await page.evaluate(() => document.fonts.ready);
+    const background = await page.locator('.hero-frame').evaluate(element => getComputedStyle(element).backgroundImage);
+    expect(background).toContain(image);
+    expect(await page.locator('.section-heading h2').first().evaluate(element => getComputedStyle(element).fontFamily)).toContain('Manrope');
+    expect(await page.locator('.event-intro h1').evaluate(element => getComputedStyle(element).fontFamily)).toContain('Unbounded');
+    expect((await request.get(`/img/${image}`)).status()).toBe(200);
+  }
+});
+
 test('match filters and page metadata follow the selected tournament', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'http://127.0.0.1:5307/');

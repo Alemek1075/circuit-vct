@@ -17,7 +17,7 @@
         <nav class="season-nav" aria-label="Вибір турніру">
             @foreach (var item in Model.Tournaments.OrderByDescending(t => t.Season))
             {
-                <a href="/?tournament=@item.Slug" class="season-nav__item @(item.Id == tournament.Id ? "is-current" : "")" aria-current="@(item.Id == tournament.Id ? "page" : null)">
+                <a href="/?tournament=@item.Slug" class="season-nav__item @(item.Id == tournament.Id ? "is-current" : "")" aria-label="@item.City @item.Season" aria-current="@(item.Id == tournament.Id ? "page" : null)">
                     <span class="season-nav__year">@item.Season</span>
                     <span><strong>@item.Name</strong><small>@(item.IsComplete ? "Архів · результати" : "Поточний · розклад")</small></span>
                     <span class="season-nav__arrow" aria-hidden="true">↗</span>
@@ -46,6 +46,7 @@
             }
         </nav>
         <main id="main-content" data-live-tournament="@tournament.Id">
+            <div class="hero-frame @(tournament.IsComplete ? "hero-frame--paris" : "hero-frame--shanghai")">
             <section class="event-intro" aria-labelledby="event-title">
                 <div class="event-intro__top"><span class="eyebrow">VALORANT CHAMPIONS <span class="eyebrow__slash">/</span> @tournament.Season</span><span class="event-status @(tournament.IsComplete ? "is-complete" : "")">@(tournament.IsComplete ? "ЗАВЕРШЕНО" : "ТРИВАЄ ЗА РОЗКЛАДОМ")</span></div>
                 <h1 id="event-title">CHAMPIONS <span>@tournament.City.ToUpperInvariant()</span></h1>
@@ -68,6 +69,7 @@
                     <span class="headline-result__date">24.09 — 18.10</span>
                 </section>
             }
+            </div>
 
             <section id="bracket" class="main-section" aria-labelledby="bracket-title">
                 <div class="section-heading"><div><p class="section-index">01 / ТУРНІР</p><h2 id="bracket-title">@(tournament.IsComplete ? "Шлях до титулу" : "Стартові матчі")</h2><p class="section-description">@(tournament.IsComplete ? "Верхня й нижня сітки. Оберіть команду, щоб побачити її шлях." : "Оголошені пари групового етапу. Рахунки з'являться лише після перевірки результатів.")</p></div>
@@ -135,7 +137,7 @@
                 <div class="match-list">@foreach (var match in Model.Matches.OrderBy(m => m.Lane == "final" ? 4 : m.Lane == "lower" ? 3 : m.Lane == "upper" ? 2 : 1).ThenBy(m => m.Round).ThenBy(m => m.Slot)) { <a href="/match/@match.Id" class="match-list__row" data-match-id="@match.Id" data-lane="@match.Lane" data-date="@match.MatchDate?.ToString("yyyy-MM-dd")" data-team-a="@match.TeamAId" data-team-b="@match.TeamBId"><span class="match-list__code">@match.Code</span><span class="match-list__phase">@match.Label</span><span class="match-list__pair">@match.TeamA?.ShortName <strong>@(match.IsPlayed ? $"{match.ScoreA}:{match.ScoreB}" : "—")</strong> @match.TeamB?.ShortName</span><span class="match-list__arrow" aria-hidden="true">↗</span></a> }</div>
             </section>
         </main>
-        <footer class="site-footer"><div><strong>CIRCUIT</strong><span>Неофіційний навчальний проєкт. Не пов'язаний із Riot Games.</span>@if (AppEnvironment.IsDevelopment()) { <a href="/studio">Редактор ↗</a> }</div><div>Дані: <a href="@tournament.SourceUrl" target="_blank" rel="noopener noreferrer">@(tournament.IsComplete ? "VLR.gg" : "VALORANT Esports") ↗</a><span>Знімок @tournament.SnapshotOn.ToString("dd.MM.yyyy")</span></div></footer>
+        <footer class="site-footer"><div><strong>CIRCUIT</strong><span>Неофіційний навчальний проєкт. Не пов'язаний із Riot Games.</span>@if (AppEnvironment.IsDevelopment()) { <a href="/studio">Редактор ↗</a> }</div><div>Дані: <a href="@tournament.SourceUrl" target="_blank" rel="noopener noreferrer">@(tournament.IsComplete ? "VLR.gg" : "VALORANT Esports") ↗</a><span>Арт: <a href="@(tournament.IsComplete ? "https://valorantesports.com/en-US/news/vct-2025-season-wrap-up" : "https://playvalorant.com/en-us/news/riotstore/champions-shanghai-merch-collection/")" target="_blank" rel="noopener noreferrer">Riot Games ↗</a></span><span>Знімок @tournament.SnapshotOn.ToString("dd.MM.yyyy")</span></div></footer>
     </div>
 </div>
 @section Scripts {

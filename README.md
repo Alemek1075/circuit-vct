@@ -12,6 +12,8 @@
 
 Проєкт навчальний і не пов'язаний із Riot Games. Дані є знімком від 24.09.2026, а не автоматичною трансляцією. [Джерело результатів Paris](https://www.vlr.gg/event/2283/), [офіційний формат Shanghai](https://valorantesports.com/en-US/tournament/115576361459045501/overview) і [розклад](https://valorantesports.com/en-US).
 
+Оформлення використовує офіційне [фото Champions Paris](https://valorantesports.com/en-US/news/vct-2025-season-wrap-up) і [арт Champions Shanghai](https://playvalorant.com/en-us/news/riotstore/champions-shanghai-merch-collection/) від Riot Games. Зображення зберігаються локально для стабільного показу. Інтерфейс Circuit і навчальний сайт не є офіційним продуктом Riot Games.
+
 Публічний перегляд є статичним експортом 48 сторінок: сітки, фільтри, графіки й переходи працюють у браузері. GitHub Actions відтворює цей експорт після кожного push у `main`. SQLite, MVC редактор, API записи й SignalR працюють при локальному запуску .NET застосунку; вони не доступні на GitHub Pages. Експорт відтворюється командою `node tools/export-static.mjs` після Release збірки.
 
 ## Запуск

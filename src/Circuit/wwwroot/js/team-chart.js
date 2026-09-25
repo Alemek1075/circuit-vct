@@ -8,7 +8,7 @@
       labels,
       datasets: [{
         data: margins,
-        backgroundColor: margins.map(value => value > 0 ? '#8ecbc3' : '#e9aa76'),
+        backgroundColor: margins.map(value => value > 0 ? '#ff4655' : '#aeb9c5'),
         borderRadius: 0,
         barThickness: 18
       }]
@@ -23,8 +23,8 @@
         tooltip: { callbacks: { label: context => `${context.raw > 0 ? '+' : ''}${context.raw} карт` } }
       },
       scales: {
-        x: { min: -3, max: 3, grid: { color: '#2b434b' }, border: { display: false }, ticks: { color: '#8fa5aa', stepSize: 1, font: { family: 'IBM Plex Mono' } } },
-        y: { grid: { display: false }, border: { display: false }, ticks: { color: '#d9e4e3', font: { family: 'IBM Plex Mono' } } }
+        x: { min: -3, max: 3, grid: { color: '#354253' }, border: { display: false }, ticks: { color: '#aeb9c5', stepSize: 1, font: { family: 'IBM Plex Mono' } } },
+        y: { grid: { display: false }, border: { display: false }, ticks: { color: '#f4f1ec', font: { family: 'IBM Plex Mono' } } }
       }
     }
   });
