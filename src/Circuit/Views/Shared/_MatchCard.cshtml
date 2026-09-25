@@ -6,7 +6,7 @@
     var nameA = Model.TeamA?.Name ?? "Очікується";
     var nameB = Model.TeamB?.Name ?? "Очікується";
 }
-<a class="match-card" href="/match/@Model.Id" data-match-code="@Model.Code" data-next-win="@Model.NextWinCode"
+<a class="match-card" href="/match/@Model.Id" data-match-id="@Model.Id" data-match-code="@Model.Code" data-next-win="@Model.NextWinCode"
    data-team-a="@Model.TeamAId" data-team-b="@Model.TeamBId"
    aria-label="@Model.Label: @nameA @(played ? Model.ScoreA : "без рахунку") — @nameB @(played ? Model.ScoreB : "без рахунку")">
     <span class="match-card__meta"><span>@Model.Code</span><span>BO@(Model.BestOf)</span></span>

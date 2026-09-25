@@ -2,10 +2,14 @@
 @{
     var match = Model.Match;
     ViewData["Title"] = $"{match.TeamA?.ShortName} — {match.TeamB?.ShortName} · {match.Tournament.Name}";
+    ViewData["Description"] = match.IsPlayed
+        ? $"{match.TeamA?.Name} проти {match.TeamB?.Name}: рахунок {match.ScoreA}:{match.ScoreB}, {match.Tournament.Name} {match.Tournament.Season}."
+        : $"Майбутній матч {match.TeamA?.Name} проти {match.TeamB?.Name} на {match.Tournament.Name} {match.Tournament.Season}.";
+    ViewData["CanonicalPath"] = $"/match/{match.Id}";
 }
 <div class="detail-layout">
     <header class="detail-header"><a href="/" class="detail-header__brand">CIRCUIT<span>/</span></a><a href="/?tournament=@match.Tournament.Slug#bracket">← Сітка @match.Tournament.Name</a></header>
-    <main class="detail-main">
+    <main class="detail-main" data-live-tournament="@match.TournamentId">
         <p class="detail-kicker">@match.Tournament.Name.ToUpperInvariant() / @match.Code</p>
         <h1>@match.Label</h1>
         <div class="detail-score" aria-label="@(match.IsPlayed ? $"Рахунок {match.ScoreA} до {match.ScoreB}" : "Рахунок ще невідомий")">
@@ -29,3 +33,7 @@
     </main>
     <footer class="detail-footer">Неофіційний навчальний проєкт · <a href="@match.Tournament.SourceUrl" target="_blank" rel="noopener noreferrer">Джерело турніру ↗</a></footer>
 </div>
+@section Scripts {
+    <script src="~/js/signalr.min.js" defer></script>
+    <script src="~/js/live-scores.js" asp-append-version="true" defer></script>
+}

@@ -73,5 +73,22 @@
       picker.value = initialTeam;
       highlight(initialTeam);
     }
+    document.addEventListener('circuit:score-update', redraw);
+  }
+
+  const matchFilter = document.querySelector('#match-filter');
+  if (matchFilter) {
+    const count = document.querySelector('#match-filter-count');
+    const applyFilter = () => {
+      const rows = [...document.querySelectorAll('.match-list__row')];
+      const value = matchFilter.value;
+      const visible = rows.filter(row => {
+        row.hidden = Boolean(value) && row.dataset.lane !== value && row.dataset.date !== value;
+        return !row.hidden;
+      }).length;
+      count.textContent = `${visible} матчів`;
+    };
+    matchFilter.addEventListener('change', applyFilter);
+    document.addEventListener('circuit:score-update', applyFilter);
   }
 })();

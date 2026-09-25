@@ -1,5 +1,6 @@
 @using Circuit.Models
 @{
+    ViewData["Robots"] = "noindex,nofollow";
     ViewData["Title"] = "Редактор";
     var tournaments = (IReadOnlyList<Tournament>)ViewBag.Tournaments;
     var teams = (IReadOnlyList<Team>)ViewBag.Teams;

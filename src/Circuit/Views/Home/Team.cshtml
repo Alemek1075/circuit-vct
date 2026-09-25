@@ -1,7 +1,16 @@
 @model Circuit.ViewModels.TeamPageModel
+@using System.Text.Json
 @{
     var team = Model.Team;
     ViewData["Title"] = $"{team.Name} · {team.Tournament.Name}";
+    ViewData["Description"] = $"{team.Name}: матчі, результати й місце на {team.Tournament.Name} {team.Tournament.Season}.";
+    ViewData["CanonicalPath"] = $"/team/{team.Id}";
+    var played = Model.Matches.Where(m => m.IsPlayed).ToList();
+    var chartData = JsonSerializer.Serialize(new
+    {
+        labels = played.Select(m => m.Code),
+        margins = played.Select(m => m.TeamAId == team.Id ? m.ScoreA!.Value - m.ScoreB!.Value : m.ScoreB!.Value - m.ScoreA!.Value)
+    });
 }
 <div class="detail-layout">
     <header class="detail-header"><a href="/" class="detail-header__brand">CIRCUIT<span>/</span></a><a href="/?tournament=@team.Tournament.Slug&team=@team.Id#bracket">← Шлях команди в сітці</a></header>
@@ -9,7 +18,24 @@
         <p class="detail-kicker">@team.Tournament.Name.ToUpperInvariant() / @team.Region.ToUpperInvariant()</p>
         <h1>@team.Name</h1>
         <div class="team-summary"><img src="@team.MarkUrl" alt="" width="72" height="72" /><div><span>КОМАНДА</span><strong>@team.ShortName</strong></div><div><span>РЕГІОН</span><strong>@team.Region</strong></div><div><span>МІСЦЕ</span><strong>@(team.Placement?.ToString() ?? "У процесі")</strong></div></div>
+        <section class="detail-section team-chart-section"><div class="team-chart-heading"><div><p class="detail-kicker">СТАТИСТИКА / @played.Count МАТЧІВ</p><h2>Різниця карт</h2></div><p>Плюс означає перемогу в матчі, мінус означає поразку.</p></div>
+            @if (played.Count > 0)
+            {
+                <div class="team-chart" data-team-chart="@chartData"><canvas role="img" aria-label="Різниця виграних і програних карт за матчами @team.Name"></canvas></div>
+            }
+            else
+            {
+                <p class="chart-empty">Результатів для графіка поки немає.</p>
+            }
+        </section>
         <section class="detail-section"><h2>Матчі команди</h2><div class="detail-links">@foreach (var match in Model.Matches) { <a href="/match/@match.Id"><span>@match.Code · @match.TeamA?.ShortName — @match.TeamB?.ShortName</span><span>@(match.IsPlayed ? $"{match.ScoreA}:{match.ScoreB}" : "без рахунку") ↗</span></a> }</div></section>
     </main>
     <footer class="detail-footer">Неофіційний навчальний проєкт · <a href="@team.Tournament.SourceUrl" target="_blank" rel="noopener noreferrer">Джерело турніру ↗</a></footer>
 </div>
+@if (played.Count > 0)
+{
+    @section Scripts {
+        <script src="~/js/chart.umd.min.js" defer></script>
+        <script src="~/js/team-chart.js" asp-append-version="true" defer></script>
+    }
+}

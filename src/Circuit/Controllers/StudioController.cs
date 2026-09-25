@@ -1,12 +1,13 @@
 using Circuit.Data;
 using Circuit.Models;
+using Circuit.Realtime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Circuit.Controllers;
 
 [Route("studio")]
-public sealed class StudioController(CircuitDbContext db, IWebHostEnvironment environment) : Controller
+public sealed class StudioController(CircuitDbContext db, IWebHostEnvironment environment, ScorePublisher scores) : Controller
 {
     private bool Enabled => environment.IsDevelopment();
 
@@ -191,7 +192,10 @@ public sealed class StudioController(CircuitDbContext db, IWebHostEnvironment en
             if (error is not null) ModelState.AddModelError(string.Empty, error);
         }
         if (!ModelState.IsValid) { await LoadChoicesAsync(); return View("MatchForm", input); }
+        var previousTournamentId = item.TournamentId;
         EditorRules.Apply(item, input); await db.SaveChangesAsync();
+        await scores.ChangedAsync(item.TournamentId, item.Id);
+        if (previousTournamentId != item.TournamentId) await scores.ChangedAsync(previousTournamentId, item.Id);
         TempData["Notice"] = "Матч оновлено."; return RedirectToAction(nameof(Index));
     }
 

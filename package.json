@@ -2,9 +2,14 @@
   "name": "circuit-tests",
   "private": true,
   "scripts": {
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "bench:transport": "node tests/transport-benchmark.cjs"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "8.0.29",
+    "chart.js": "4.5.1"
   }
 }

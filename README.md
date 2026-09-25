@@ -2,7 +2,11 @@
 
 [Код на GitHub](https://github.com/Alemek1075/circuit-vct)
 
+![Головна сторінка Circuit з сіткою Champions Paris](docs/preview.png)
+
 Неофіційний українськомовний сайт турнірних сіток VALORANT Champions. Завершений плейоф **Champions Paris 2025** має 14 перевірених матчів, верхню й нижню сітки та підсвічування маршруту команди. **Champions Shanghai 2026** показує 16 учасників і вісім оголошених стартових пар без вигаданих рахунків.
+
+У списку матчів є фільтр за сіткою або днем. Сторінка команди показує графік різниці карт лише для зіграних матчів. Зміни рахунку, внесені локальним редактором, надходять у відкриті вкладки через SignalR без перезавантаження. Це не офіційний live feed.
 
 Проєкт навчальний і не пов'язаний із Riot Games. Дані є знімком від 24.09.2026, а не автоматичною трансляцією. [Джерело результатів Paris](https://www.vlr.gg/event/2283/), [офіційний формат Shanghai](https://valorantesports.com/en-US/tournament/115576361459045501/overview) і [розклад](https://valorantesports.com/en-US).
 
@@ -46,13 +50,17 @@ npm run test:e2e
 pwsh -NoProfile -File tests/ApiSmoke.ps1
 ```
 
+Для повторення локального порівняння WebSockets, SSE і Long Polling запустіть `npm run bench:transport`. Скрипт сам запускає сервер з окремою базою й записує фактичні результати в [TRANSPORT_REPORT.md](TRANSPORT_REPORT.md).
+
+Публічні HTML сторінки мають окремі описи, canonical адреси, `robots.txt` і динамічний `sitemap.xml`. Редактор позначено `noindex`.
+
 ## Контейнер
 
 ```powershell
 docker compose up --build
 ```
 
-Адреса `http://localhost:8080`, SQLite зберігається в `circuit_data`. Compose запускає Production, тож запис вимкнений. `docker compose config --quiet` пройшов; реальний запуск контейнера на цій машині ще не підтверджено через недоступний Docker daemon.
+Адреса `http://localhost:8080`, SQLite зберігається в `circuit_data`. Compose запускає Production, тож запис вимкнений. Опубліковану .NET збірку перевірено в Production: сторінка, health і CSS відповіли 200, редактор 404, API записи 403. `docker compose config --quiet` пройшов; реальний запуск контейнера на цій машині ще не підтверджено через недоступний Docker daemon.
 
 ## Документи
 

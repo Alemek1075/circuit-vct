@@ -5,6 +5,10 @@
     var final = Model.GrandFinal;
     var champion = final is null ? null : Model.Teams.FirstOrDefault(t => t.Id == final.WinnerId);
     ViewData["Title"] = $"{tournament.Name} {tournament.Season}";
+    ViewData["Description"] = tournament.IsComplete
+        ? $"Результати {tournament.Name} {tournament.Season}: верхня і нижня сітки, усі матчі та шлях команд до фіналу."
+        : $"Розклад перших матчів {tournament.Name} {tournament.Season}, учасники та майбутня сітка без непідтверджених рахунків.";
+    ViewData["CanonicalPath"] = tournament.Slug == "paris-2025" ? "/" : $"/?tournament={Uri.EscapeDataString(tournament.Slug)}";
 }
 <div class="app-shell">
     <aside class="side-rail" aria-label="Навігація сайту">
@@ -41,7 +45,7 @@
                 <a href="/?tournament=@item.Slug" class="@(item.Id == tournament.Id ? "is-current" : "")" aria-current="@(item.Id == tournament.Id ? "page" : null)">@item.City @item.Season</a>
             }
         </nav>
-        <main id="main-content">
+        <main id="main-content" data-live-tournament="@tournament.Id">
             <section class="event-intro" aria-labelledby="event-title">
                 <div class="event-intro__top"><span class="eyebrow">VALORANT CHAMPIONS <span class="eyebrow__slash">/</span> @tournament.Season</span><span class="event-status @(tournament.IsComplete ? "is-complete" : "")">@(tournament.IsComplete ? "ЗАВЕРШЕНО" : "ТРИВАЄ ЗА РОЗКЛАДОМ")</span></div>
                 <h1 id="event-title">CHAMPIONS <span>@tournament.City.ToUpperInvariant()</span></h1>
@@ -126,9 +130,15 @@
             </section>
 
             <section id="matches" class="main-section matches-section" aria-labelledby="matches-title"><div class="section-heading"><div><p class="section-index">03 / АРХІВ</p><h2 id="matches-title">Усі матчі</h2></div><span class="section-count">@Model.Matches.Count записів</span></div>
-                <div class="match-list">@foreach (var match in Model.Matches.OrderBy(m => m.Lane == "final" ? 4 : m.Lane == "lower" ? 3 : m.Lane == "upper" ? 2 : 1).ThenBy(m => m.Round).ThenBy(m => m.Slot)) { <a href="/match/@match.Id" class="match-list__row" data-team-a="@match.TeamAId" data-team-b="@match.TeamBId"><span class="match-list__code">@match.Code</span><span class="match-list__phase">@match.Label</span><span class="match-list__pair">@match.TeamA?.ShortName <strong>@(match.IsPlayed ? $"{match.ScoreA}:{match.ScoreB}" : "—")</strong> @match.TeamB?.ShortName</span><span class="match-list__arrow" aria-hidden="true">↗</span></a> }</div>
+                <div class="match-filter"><label for="match-filter">@(tournament.IsComplete ? "Етап сітки" : "День матчів")</label><select id="match-filter"><option value="">Усі матчі</option>@if (tournament.IsComplete) { <option value="upper">Верхня сітка</option><option value="lower">Нижня сітка</option><option value="final">Гранд-фінал</option> } else { @foreach (var day in Model.Matches.Where(m => m.MatchDate.HasValue).Select(m => m.MatchDate!.Value).Distinct().OrderBy(d => d)) { <option value="@day.ToString("yyyy-MM-dd")">@day.ToString("dd.MM.yyyy")</option> } }</select><span id="match-filter-count" role="status" aria-live="polite">@Model.Matches.Count матчів</span></div>
+                <p class="live-status" role="status" aria-live="polite" data-live-status>Оновлення рахунків власного редактора</p>
+                <div class="match-list">@foreach (var match in Model.Matches.OrderBy(m => m.Lane == "final" ? 4 : m.Lane == "lower" ? 3 : m.Lane == "upper" ? 2 : 1).ThenBy(m => m.Round).ThenBy(m => m.Slot)) { <a href="/match/@match.Id" class="match-list__row" data-match-id="@match.Id" data-lane="@match.Lane" data-date="@match.MatchDate?.ToString("yyyy-MM-dd")" data-team-a="@match.TeamAId" data-team-b="@match.TeamBId"><span class="match-list__code">@match.Code</span><span class="match-list__phase">@match.Label</span><span class="match-list__pair">@match.TeamA?.ShortName <strong>@(match.IsPlayed ? $"{match.ScoreA}:{match.ScoreB}" : "—")</strong> @match.TeamB?.ShortName</span><span class="match-list__arrow" aria-hidden="true">↗</span></a> }</div>
             </section>
         </main>
         <footer class="site-footer"><div><strong>CIRCUIT</strong><span>Неофіційний навчальний проєкт. Не пов'язаний із Riot Games.</span>@if (AppEnvironment.IsDevelopment()) { <a href="/studio">Редактор ↗</a> }</div><div>Дані: <a href="@tournament.SourceUrl" target="_blank" rel="noopener noreferrer">@(tournament.IsComplete ? "VLR.gg" : "VALORANT Esports") ↗</a><span>Знімок @tournament.SnapshotOn.ToString("dd.MM.yyyy")</span></div></footer>
     </div>
 </div>
+@section Scripts {
+    <script src="~/js/signalr.min.js" defer></script>
+    <script src="~/js/live-scores.js" asp-append-version="true" defer></script>
+}
