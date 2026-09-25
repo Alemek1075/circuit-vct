@@ -75,6 +75,12 @@ try {
   ];
   if (output !== path.resolve(root, 'tests', '.tmp', 'circuit-vct'))
     throw new Error('Unexpected export directory');
+  if (fs.existsSync(output)) {
+    const realTemporary = fs.realpathSync(path.join(root, 'tests', '.tmp'));
+    const realOutput = fs.realpathSync(output);
+    if (path.relative(realTemporary, realOutput) !== 'circuit-vct')
+      throw new Error('Export directory resolves outside the temporary workspace');
+  }
   fs.rmSync(output, { recursive: true, force: true });
   fs.mkdirSync(output, { recursive: true });
   fs.cpSync(path.join(root, 'src', 'Circuit', 'wwwroot'), output, { recursive: true });
@@ -94,6 +100,18 @@ try {
   const sitemap = `<?xml version="1.0" encoding="utf-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
     pages.map(([name]) => `<url><loc>${publicBase}${name}</loc></url>`).join('') + '</urlset>';
   fs.writeFileSync(path.join(output, 'sitemap.xml'), sitemap);
+  for (const [name] of pages) {
+    const html = fs.readFileSync(path.join(output, name), 'utf8');
+    for (const match of html.matchAll(/(?:href|src)="\/circuit-vct\/([^\"]+)"/g)) {
+      const asset = match[1].split(/[?#]/, 1)[0];
+      if (!fs.existsSync(path.join(output, asset)))
+        throw new Error(`${name} references missing ${asset}`);
+    }
+  }
+  for (const match of fs.readFileSync(stylesheet, 'utf8').matchAll(/url\("\/circuit-vct\/([^\"]+)"\)/g)) {
+    if (!fs.existsSync(path.join(output, match[1])))
+      throw new Error(`Stylesheet references missing ${match[1]}`);
+  }
   console.log(`Exported ${pages.length} public pages to ${output}`);
 } finally {
   server.kill();
