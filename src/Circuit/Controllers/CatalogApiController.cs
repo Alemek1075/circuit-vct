@@ -159,10 +159,10 @@ public sealed class CatalogApiController(CircuitDbContext db, IWebHostEnvironmen
         if (item is null) return NotFound();
         var error = await EditorRules.CheckMatchAsync(db, input, id);
         if (error is not null) return BadRequest(new { error });
-        var previousTournamentId = item.TournamentId;
+        var scoreChanged = item.ScoreA != input.ScoreA || item.ScoreB != input.ScoreB;
+        var tournamentUnchanged = item.TournamentId == input.TournamentId;
         EditorRules.Apply(item, input); await db.SaveChangesAsync();
-        await scores.ChangedAsync(item.TournamentId, item.Id);
-        if (previousTournamentId != item.TournamentId) await scores.ChangedAsync(previousTournamentId, item.Id);
+        if (scoreChanged && tournamentUnchanged) await scores.ChangedAsync(item.TournamentId, item.Id);
         return NoContent();
     }
 
