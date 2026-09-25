@@ -1,4 +1,18 @@
 (() => {
+  const sections = [...document.querySelectorAll('.section-nav a[href^="#"]')]
+    .map(link => ({ link, section: document.querySelector(link.getAttribute('href')) }))
+    .filter(item => item.section);
+  if (sections.length) {
+    const updateCurrentSection = () => {
+      const current = [...sections].reverse().find(item => item.section.getBoundingClientRect().top <= 170) ?? sections[0];
+      for (const item of sections) {
+        if (item === current) item.link.setAttribute('aria-current', 'location');
+        else item.link.removeAttribute('aria-current');
+      }
+    };
+    updateCurrentSection();
+    window.addEventListener('scroll', updateCurrentSection, { passive: true });
+  }
   const boards = [...document.querySelectorAll('[data-bracket]')];
   const picker = document.querySelector('#team-select');
 

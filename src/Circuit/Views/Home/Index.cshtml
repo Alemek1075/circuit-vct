@@ -56,7 +56,7 @@
             @if (tournament.IsComplete && final is not null && champion is not null)
             {
                 <section class="headline-result" aria-label="Результат фіналу">
-                    <div class="headline-result__label"><span>ЧЕМПІОН · @tournament.Season</span><strong>@champion.Name</strong><small>Фінал · BO@(final.BestOf)</small></div>
+                    <div class="headline-result__label"><img src="@champion.MarkUrl" alt="" width="56" height="56" /><span>Чемпіон @tournament.Season</span><strong>@champion.Name</strong><small>Гранд-фінал · BO@(final.BestOf)</small></div>
                     <div class="headline-result__score"><span>@final.TeamA?.ShortName</span><strong>@final.ScoreA <em>:</em> @final.ScoreB</strong><span>@final.TeamB?.ShortName</span></div>
                     <a href="/match/@final.Id" class="headline-result__link">Відкрити фінал <span aria-hidden="true">↗</span></a>
                 </section>
@@ -64,7 +64,7 @@
             else
             {
                 <section class="headline-result headline-result--upcoming" aria-label="Поточний турнір">
-                    <div class="headline-result__label"><span>ПОПЕРЕДУ</span><strong>Шлях до фіналу</strong><small>Результати ще не внесені</small></div>
+                    <div class="headline-result__label"><span>Турнір триває</span><strong>Шлях до фіналу</strong><small>Результати ще не внесені</small></div>
                     <p>Груповий етап визначить вісім учасників плейоф. Нижче лише оголошені стартові пари.</p>
                     <span class="headline-result__date">24.09 — 18.10</span>
                 </section>
@@ -137,7 +137,7 @@
                 <div class="match-list">@foreach (var match in Model.Matches.OrderBy(m => m.Lane == "final" ? 4 : m.Lane == "lower" ? 3 : m.Lane == "upper" ? 2 : 1).ThenBy(m => m.Round).ThenBy(m => m.Slot)) { <a href="/match/@match.Id" class="match-list__row" data-match-id="@match.Id" data-lane="@match.Lane" data-date="@match.MatchDate?.ToString("yyyy-MM-dd")" data-team-a="@match.TeamAId" data-team-b="@match.TeamBId"><span class="match-list__code">@match.Code</span><span class="match-list__phase">@match.Label</span><span class="match-list__pair">@match.TeamA?.ShortName <strong>@(match.IsPlayed ? $"{match.ScoreA}:{match.ScoreB}" : "—")</strong> @match.TeamB?.ShortName</span><span class="match-list__arrow" aria-hidden="true">↗</span></a> }</div>
             </section>
         </main>
-        <footer class="site-footer"><div><strong>CIRCUIT</strong><span>Неофіційний навчальний проєкт. Не пов'язаний із Riot Games.</span>@if (AppEnvironment.IsDevelopment()) { <a href="/studio">Редактор ↗</a> }</div><div>Дані: <a href="@tournament.SourceUrl" target="_blank" rel="noopener noreferrer">@(tournament.IsComplete ? "VLR.gg" : "VALORANT Esports") ↗</a><span>Арт: <a href="@(tournament.IsComplete ? "https://valorantesports.com/en-US/news/vct-2025-season-wrap-up" : "https://playvalorant.com/en-us/news/riotstore/champions-shanghai-merch-collection/")" target="_blank" rel="noopener noreferrer">Riot Games ↗</a></span><span>Знімок @tournament.SnapshotOn.ToString("dd.MM.yyyy")</span></div></footer>
+        <footer class="site-footer"><div><strong>CIRCUIT</strong><span>Неофіційний навчальний проєкт. Не пов'язаний із Riot Games.</span>@if (AppEnvironment.IsDevelopment()) { <a href="/studio">Редактор ↗</a> }</div><div>Дані: <a href="@tournament.SourceUrl" target="_blank" rel="noopener noreferrer">@(tournament.IsComplete ? "VLR.gg" : "VALORANT Esports") ↗</a><span>Фото: <a href="@(tournament.IsComplete ? "https://valorantesports.com/en-US/news/vct-2025-season-wrap-up" : "https://valorantesports.com/en-US/news/champions-2026-is-coming-to-shanghai")" target="_blank" rel="noopener noreferrer">Riot Games ↗</a></span><span>Емблеми: <a href="@(tournament.IsComplete ? "https://valorantesports.com/en-US/tournament/113482263742879102/overview" : "https://valorantesports.com/en-US/tournament/115576361459045501/overview")" target="_blank" rel="noopener noreferrer">VCT ↗</a></span><span>Знімок @tournament.SnapshotOn.ToString("dd.MM.yyyy")</span></div></footer>
     </div>
 </div>
 @section Scripts {

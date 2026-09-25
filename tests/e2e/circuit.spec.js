@@ -37,6 +37,10 @@ test('event artwork and Ukrainian display font load for both tournaments', async
     expect(await page.locator('.section-heading h2').first().evaluate(element => getComputedStyle(element).fontFamily)).toContain('Manrope');
     expect(await page.locator('.event-intro h1').evaluate(element => getComputedStyle(element).fontFamily)).toContain('Unbounded');
     expect((await request.get(`/img/${image}`)).status()).toBe(200);
+    const mark = await page.locator('.match-card img').first().getAttribute('src');
+    const logo = await request.get(mark);
+    expect(logo.status()).toBe(200);
+    expect(await logo.text()).toContain('data:image/png;base64,');
   }
 });
 
