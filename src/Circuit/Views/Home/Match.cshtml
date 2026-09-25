@@ -1,0 +1,31 @@
+@model Circuit.ViewModels.MatchPageModel
+@{
+    var match = Model.Match;
+    ViewData["Title"] = $"{match.TeamA?.ShortName} — {match.TeamB?.ShortName} · {match.Tournament.Name}";
+}
+<div class="detail-layout">
+    <header class="detail-header"><a href="/" class="detail-header__brand">CIRCUIT<span>/</span></a><a href="/?tournament=@match.Tournament.Slug#bracket">← Сітка @match.Tournament.Name</a></header>
+    <main class="detail-main">
+        <p class="detail-kicker">@match.Tournament.Name.ToUpperInvariant() / @match.Code</p>
+        <h1>@match.Label</h1>
+        <div class="detail-score" aria-label="@(match.IsPlayed ? $"Рахунок {match.ScoreA} до {match.ScoreB}" : "Рахунок ще невідомий")">
+            <div class="detail-score__team">@if (match.TeamA?.MarkUrl is not null) { <img src="@match.TeamA.MarkUrl" alt="" /> }<span>@(match.TeamA?.ShortName ?? "TBD")</span></div>
+            <div class="detail-score__value">@(match.IsPlayed ? $"{match.ScoreA}:{match.ScoreB}" : "— : —")</div>
+            <div class="detail-score__team"><span>@(match.TeamB?.ShortName ?? "TBD")</span>@if (match.TeamB?.MarkUrl is not null) { <img src="@match.TeamB.MarkUrl" alt="" /> }</div>
+        </div>
+        <dl class="detail-meta"><div><dt>СТАДІЯ</dt><dd>@match.Label</dd></div><div><dt>ФОРМАТ</dt><dd>Best of @match.BestOf</dd></div><div><dt>ДАТА</dt><dd>@(match.MatchDate?.ToString("dd.MM.yyyy") ?? "В архіві без часу початку")</dd></div></dl>
+        @if (match.IsPlayed)
+        {
+            <section class="detail-section"><h2>Що далі</h2><p>Переможець: @(match.WinnerId == match.TeamAId ? match.TeamA?.Name : match.TeamB?.Name). @(match.NextWinCode is null ? "Це останній матч турніру." : $"Наступний матч верхнього шляху: {match.NextWinCode}.") @(match.NextLossCode is null ? "" : $"Команда після поразки переходить у {match.NextLossCode}.")</p></section>
+        }
+        else
+        {
+            <section class="detail-section"><h2>Матч попереду</h2><p>Рахунок залишено порожнім, доки результат не буде перевірено.</p></section>
+        }
+        @if (Model.Related.Count > 0)
+        {
+            <section class="detail-section"><h2>Інші матчі цих команд</h2><div class="detail-links">@foreach (var item in Model.Related.Take(8)) { <a href="/match/@item.Id"><span>@item.TeamA?.ShortName — @item.TeamB?.ShortName</span><span>@item.Code · @(item.IsPlayed ? $"{item.ScoreA}:{item.ScoreB}" : "без рахунку") ↗</span></a> }</div></section>
+        }
+    </main>
+    <footer class="detail-footer">Неофіційний навчальний проєкт · <a href="@match.Tournament.SourceUrl" target="_blank" rel="noopener noreferrer">Джерело турніру ↗</a></footer>
+</div>

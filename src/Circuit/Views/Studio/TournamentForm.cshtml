@@ -1,0 +1,11 @@
+@model Circuit.Models.TournamentInput
+@{
+    int? editId = ViewBag.EditId is int value ? value : null;
+    ViewData["Title"] = editId is null ? "Новий турнір" : "Редагувати турнір";
+}
+<div class="detail-layout studio-layout"><header class="detail-header"><a href="/" class="detail-header__brand">CIRCUIT<span>/</span></a><a href="/studio">← Редактор</a></header>
+<main class="studio-form-main"><p class="detail-kicker">ТУРНІРИ / @(editId is null ? "НОВИЙ" : "ЗМІНИ")</p><h1>@ViewData["Title"]</h1>
+<form method="post" action="@(editId is null ? "/studio/tournaments/new" : $"/studio/tournaments/{editId}")" class="editor-form">@Html.AntiForgeryToken()<div asp-validation-summary="All" class="form-errors" role="alert"></div>
+    <div class="form-grid"><label>Адреса турніру<input asp-for="Slug" autocomplete="off" placeholder="paris-2025" /></label><label>Назва<input asp-for="Name" /></label><label>Сезон<input asp-for="Season" type="number" min="2020" max="2100" /></label><label>Місто<input asp-for="City" /></label><label>Початок<input asp-for="StartsOn" type="date" /></label><label>Завершення<input asp-for="EndsOn" type="date" /></label><label class="form-grid__wide">HTTPS джерело<input asp-for="SourceUrl" type="url" /></label><label>Дата знімка<input asp-for="SnapshotOn" type="date" /></label><label class="checkbox-label"><input asp-for="IsComplete" /> Завершений турнір</label></div>
+    <div class="form-actions"><button type="submit">Зберегти турнір</button><a href="/studio">Скасувати</a></div>
+</form></main><footer class="detail-footer">Circuit · локальний редактор</footer></div>

@@ -1,0 +1,134 @@
+@model Circuit.ViewModels.TournamentPageModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment AppEnvironment
+@{
+    var tournament = Model.Tournament;
+    var final = Model.GrandFinal;
+    var champion = final is null ? null : Model.Teams.FirstOrDefault(t => t.Id == final.WinnerId);
+    ViewData["Title"] = $"{tournament.Name} {tournament.Season}";
+}
+<div class="app-shell">
+    <aside class="side-rail" aria-label="Навігація сайту">
+        <a class="wordmark" href="/" aria-label="Circuit, головна"><span class="wordmark__glyph">C<span></span></span><span>CIRCUIT<small>VALORANT BRACKETS</small></span></a>
+        <p class="rail-label">ТУРНІРИ</p>
+        <nav class="season-nav" aria-label="Вибір турніру">
+            @foreach (var item in Model.Tournaments.OrderByDescending(t => t.Season))
+            {
+                <a href="/?tournament=@item.Slug" class="season-nav__item @(item.Id == tournament.Id ? "is-current" : "")" aria-current="@(item.Id == tournament.Id ? "page" : null)">
+                    <span class="season-nav__year">@item.Season</span>
+                    <span><strong>@item.Name</strong><small>@(item.IsComplete ? "Архів · результати" : "Поточний · розклад")</small></span>
+                    <span class="season-nav__arrow" aria-hidden="true">↗</span>
+                </a>
+            }
+        </nav>
+        <p class="rail-label rail-label--sections">НА ЦІЙ СТОРІНЦІ</p>
+        <nav class="section-nav" aria-label="Розділи">
+            <a href="#bracket">@(tournament.IsComplete ? "Сітка плейоф" : "Перші матчі")</a>
+            <a href="#standings">@(tournament.IsComplete ? "Підсумкова таблиця" : "Учасники")</a>
+            <a href="#matches">Усі матчі</a>
+        </nav>
+        <div class="rail-bottom"><span class="rail-bottom__line"></span><p>Неофіційний проєкт.<br />Джерела й дата знімка внизу.</p>@if (AppEnvironment.IsDevelopment()) { <a href="/studio">Локальний редактор ↗</a> }</div>
+    </aside>
+
+    <div class="content-shell">
+        <header class="topbar">
+            <a class="mobile-wordmark" href="/">CIRCUIT<span>/</span></a>
+            <span>ТУРНІРНИЙ АРХІВ</span>
+            <span class="topbar__right">ЗНІМОК · @tournament.SnapshotOn.ToString("dd.MM.yyyy")</span>
+        </header>
+        <nav class="mobile-season-nav" aria-label="Вибір турніру">
+            @foreach (var item in Model.Tournaments.OrderByDescending(t => t.Season))
+            {
+                <a href="/?tournament=@item.Slug" class="@(item.Id == tournament.Id ? "is-current" : "")" aria-current="@(item.Id == tournament.Id ? "page" : null)">@item.City @item.Season</a>
+            }
+        </nav>
+        <main id="main-content">
+            <section class="event-intro" aria-labelledby="event-title">
+                <div class="event-intro__top"><span class="eyebrow">VALORANT CHAMPIONS <span class="eyebrow__slash">/</span> @tournament.Season</span><span class="event-status @(tournament.IsComplete ? "is-complete" : "")">@(tournament.IsComplete ? "ЗАВЕРШЕНО" : "ТРИВАЄ ЗА РОЗКЛАДОМ")</span></div>
+                <h1 id="event-title">CHAMPIONS <span>@tournament.City.ToUpperInvariant()</span></h1>
+                <div class="event-intro__foot"><p>@tournament.StartsOn.ToString("dd.MM") — @tournament.EndsOn.ToString("dd.MM.yyyy") <span class="dot-separator">/</span> @tournament.City <span class="dot-separator">/</span> @Model.Teams.Count команд</p><a href="@tournament.SourceUrl" target="_blank" rel="noopener noreferrer">Джерело даних <span aria-hidden="true">↗</span></a></div>
+            </section>
+
+            @if (tournament.IsComplete && final is not null && champion is not null)
+            {
+                <section class="headline-result" aria-label="Результат фіналу">
+                    <div class="headline-result__label"><span>ЧЕМПІОН · @tournament.Season</span><strong>@champion.Name</strong><small>Фінал · BO@(final.BestOf)</small></div>
+                    <div class="headline-result__score"><span>@final.TeamA?.ShortName</span><strong>@final.ScoreA <em>:</em> @final.ScoreB</strong><span>@final.TeamB?.ShortName</span></div>
+                    <a href="/match/@final.Id" class="headline-result__link">Відкрити фінал <span aria-hidden="true">↗</span></a>
+                </section>
+            }
+            else
+            {
+                <section class="headline-result headline-result--upcoming" aria-label="Поточний турнір">
+                    <div class="headline-result__label"><span>ПОПЕРЕДУ</span><strong>Шлях до фіналу</strong><small>Результати ще не внесені</small></div>
+                    <p>Груповий етап визначить вісім учасників плейоф. Нижче лише оголошені стартові пари.</p>
+                    <span class="headline-result__date">24.09 — 18.10</span>
+                </section>
+            }
+
+            <section id="bracket" class="main-section" aria-labelledby="bracket-title">
+                <div class="section-heading"><div><p class="section-index">01 / ТУРНІР</p><h2 id="bracket-title">@(tournament.IsComplete ? "Шлях до титулу" : "Стартові матчі")</h2><p class="section-description">@(tournament.IsComplete ? "Верхня й нижня сітки. Оберіть команду, щоб побачити її шлях." : "Оголошені пари групового етапу. Рахунки з'являться лише після перевірки результатів.")</p></div>
+                    @if (tournament.IsComplete)
+                    {
+                        <div class="team-picker"><label for="team-select">Шлях команди</label><select id="team-select"><option value="">Усі команди</option>@foreach (var team in Model.Teams.OrderBy(t => t.Name)) { <option value="@team.Id">@team.Name</option> }</select></div>
+                    }
+                </div>
+                @if (tournament.IsComplete)
+                {
+                    <div class="lane-heading"><span class="lane-heading__mark lane-heading__mark--upper"></span><h3>Верхня сітка</h3><span>Один програш переводить команду нижче</span></div>
+                    <div class="bracket-scroll" tabindex="0" aria-label="Верхня сітка, горизонтальне прокручування">
+                        <div class="bracket-grid bracket-grid--upper" data-bracket>
+                            <svg class="bracket-lines" aria-hidden="true"></svg>
+                            @foreach (var round in Model.Upper.GroupBy(m => m.Round).OrderBy(g => g.Key))
+                            {
+                                <div class="bracket-round"><h4>@(round.Key switch { 1 => "1/4 ФІНАЛУ", 2 => "1/2 ФІНАЛУ", 3 => "ФІНАЛ ВЕРХУ", _ => "ГРАНД-ФІНАЛ" })</h4><div class="bracket-round__matches">@foreach (var match in round) { <partial name="_MatchCard" model="match" /> }</div></div>
+                            }
+                        </div>
+                    </div>
+                    <div class="lane-heading lane-heading--lower"><span class="lane-heading__mark lane-heading__mark--lower"></span><h3>Нижня сітка</h3><span>Друга поразка завершує виступ</span></div>
+                    <div class="bracket-scroll" tabindex="0" aria-label="Нижня сітка, горизонтальне прокручування">
+                        <div class="bracket-grid bracket-grid--lower" data-bracket>
+                            <svg class="bracket-lines" aria-hidden="true"></svg>
+                            @foreach (var round in Model.Lower.GroupBy(m => m.Round).OrderBy(g => g.Key))
+                            {
+                                <div class="bracket-round"><h4>@(round.Key == 4 ? "ФІНАЛ НИЗУ" : $"РАУНД {round.Key}")</h4><div class="bracket-round__matches">@foreach (var match in round) { <partial name="_MatchCard" model="match" /> }</div></div>
+                            }
+                        </div>
+                    </div>
+                    <p class="bracket-note">Лінії показують шлях переможця. Перехід команди після поразки зазначено на сторінці матчу.</p>
+                }
+                else
+                {
+                    <div class="fixture-days">
+                        @foreach (var day in Model.Groups.GroupBy(m => m.MatchDate).OrderBy(g => g.Key))
+                        {
+                            <div class="fixture-day"><div class="fixture-day__heading"><strong>@day.Key?.ToString("dd.MM")</strong><span>ГРУПОВИЙ ЕТАП / BO3</span></div><div class="fixture-day__matches">@foreach (var match in day) { <partial name="_MatchCard" model="match" /> }</div></div>
+                        }
+                    </div>
+                    <div class="future-bracket"><span class="future-bracket__number">08</span><div><strong>Місць у плейоф</strong><p>По дві команди з кожної групи. Пари та рахунки додаватимуться після офіційного визначення учасників.</p></div><span class="future-bracket__path" aria-hidden="true">──┐<br />──┘</span></div>
+                }
+            </section>
+
+            <section id="standings" class="main-section standings-section" aria-labelledby="standings-title"><div class="section-heading"><div><p class="section-index">02 / КОМАНДИ</p><h2 id="standings-title">@(tournament.IsComplete ? "Підсумкова таблиця" : "Учасники за регіонами")</h2></div><span class="section-count">@Model.Teams.Count команд</span></div>
+                @if (tournament.IsComplete)
+                {
+                    <div class="table-wrap"><table class="standings-table"><thead><tr><th scope="col">МІСЦЕ</th><th scope="col">КОМАНДА</th><th scope="col">РЕГІОН</th><th scope="col">ПЕРЕМОГИ</th><th scope="col">ПОРАЗКИ</th><th scope="col" aria-label="Деталі"></th></tr></thead><tbody>
+                    @foreach (var team in Model.Teams)
+                    {
+                        var games = Model.Matches.Where(m => m.TeamAId == team.Id || m.TeamBId == team.Id).ToList();
+                        <tr data-team-row="@team.Id"><td class="place">@(team.Placement is 5 ? "5–6" : team.Placement is 7 ? "7–8" : team.Placement?.ToString())</td><td><a class="table-team" href="/team/@team.Id"><img src="@team.MarkUrl" alt="" width="34" height="34" /><strong>@team.Name</strong><small>@team.ShortName</small></a></td><td>@team.Region</td><td class="numeric">@games.Count(m => m.WinnerId == team.Id)</td><td class="numeric">@games.Count(m => m.IsPlayed && m.WinnerId != team.Id)</td><td class="table-arrow"><a href="/team/@team.Id" aria-label="Матчі команди @team.Name">↗</a></td></tr>
+                    }
+                    </tbody></table></div>
+                }
+                else
+                {
+                    <div class="region-grid">@foreach (var region in new[] { "Americas", "EMEA", "Pacific", "China" }) { <div class="region-list"><h3>@region <span>04</span></h3>@foreach (var team in Model.Teams.Where(t => t.Region == region)) { <a href="/team/@team.Id"><img src="@team.MarkUrl" alt="" width="30" height="30" /><span>@team.Name</span><span aria-hidden="true">↗</span></a> }</div> }</div>
+                }
+            </section>
+
+            <section id="matches" class="main-section matches-section" aria-labelledby="matches-title"><div class="section-heading"><div><p class="section-index">03 / АРХІВ</p><h2 id="matches-title">Усі матчі</h2></div><span class="section-count">@Model.Matches.Count записів</span></div>
+                <div class="match-list">@foreach (var match in Model.Matches.OrderBy(m => m.Lane == "final" ? 4 : m.Lane == "lower" ? 3 : m.Lane == "upper" ? 2 : 1).ThenBy(m => m.Round).ThenBy(m => m.Slot)) { <a href="/match/@match.Id" class="match-list__row" data-team-a="@match.TeamAId" data-team-b="@match.TeamBId"><span class="match-list__code">@match.Code</span><span class="match-list__phase">@match.Label</span><span class="match-list__pair">@match.TeamA?.ShortName <strong>@(match.IsPlayed ? $"{match.ScoreA}:{match.ScoreB}" : "—")</strong> @match.TeamB?.ShortName</span><span class="match-list__arrow" aria-hidden="true">↗</span></a> }</div>
+            </section>
+        </main>
+        <footer class="site-footer"><div><strong>CIRCUIT</strong><span>Неофіційний навчальний проєкт. Не пов'язаний із Riot Games.</span>@if (AppEnvironment.IsDevelopment()) { <a href="/studio">Редактор ↗</a> }</div><div>Дані: <a href="@tournament.SourceUrl" target="_blank" rel="noopener noreferrer">@(tournament.IsComplete ? "VLR.gg" : "VALORANT Esports") ↗</a><span>Знімок @tournament.SnapshotOn.ToString("dd.MM.yyyy")</span></div></footer>
+    </div>
+</div>

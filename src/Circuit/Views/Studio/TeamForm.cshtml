@@ -1,0 +1,14 @@
+@using Circuit.Models
+@using Microsoft.AspNetCore.Mvc.Rendering
+@model TeamInput
+@{
+    int? editId = ViewBag.EditId is int value ? value : null;
+    ViewData["Title"] = editId is null ? "Нова команда" : "Редагувати команду";
+    var tournaments = (IReadOnlyList<Tournament>)ViewBag.Tournaments;
+}
+<div class="detail-layout studio-layout"><header class="detail-header"><a href="/" class="detail-header__brand">CIRCUIT<span>/</span></a><a href="/studio">← Редактор</a></header>
+<main class="studio-form-main"><p class="detail-kicker">КОМАНДИ / @(editId is null ? "НОВА" : "ЗМІНИ")</p><h1>@ViewData["Title"]</h1>
+<form method="post" action="@(editId is null ? "/studio/teams/new" : $"/studio/teams/{editId}")" class="editor-form">@Html.AntiForgeryToken()<div asp-validation-summary="All" class="form-errors" role="alert"></div>
+    <div class="form-grid"><label>Турнір<select asp-for="TournamentId" asp-items="@(new SelectList(tournaments.Select(t => new { t.Id, Name = $"{t.Name} {t.Season}" }), "Id", "Name"))"><option value="">Оберіть турнір</option></select></label><label>Назва<input asp-for="Name" /></label><label>Скорочення<input asp-for="ShortName" maxlength="12" /></label><label>Регіон<input asp-for="Region" /></label><label>Колір команди<input asp-for="AccentColor" type="color" /></label><label>Місце, якщо визначене<input asp-for="Placement" type="number" min="1" max="16" /></label><label class="form-grid__wide">Посилання на зображення<input asp-for="MarkUrl" placeholder="/img/marks/team.svg" /></label></div>
+    <div class="form-actions"><button type="submit">Зберегти команду</button><a href="/studio">Скасувати</a></div>
+</form></main><footer class="detail-footer">Circuit · локальний редактор</footer></div>

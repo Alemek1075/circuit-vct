@@ -1,0 +1,22 @@
+@using Circuit.Models
+@using Microsoft.AspNetCore.Mvc.Rendering
+@model MatchInput
+@{
+    int? editId = ViewBag.EditId is int value ? value : null;
+    ViewData["Title"] = editId is null ? "Новий матч" : "Редагувати матч";
+    var tournaments = (IReadOnlyList<Tournament>)ViewBag.Tournaments;
+    var teams = (IReadOnlyList<Team>)ViewBag.Teams;
+}
+<div class="detail-layout studio-layout"><header class="detail-header"><a href="/" class="detail-header__brand">CIRCUIT<span>/</span></a><a href="/studio">← Редактор</a></header>
+<main class="studio-form-main"><p class="detail-kicker">МАТЧІ / @(editId is null ? "НОВИЙ" : "ЗМІНИ")</p><h1>@ViewData["Title"]</h1>
+<form method="post" action="@(editId is null ? "/studio/matches/new" : $"/studio/matches/{editId}")" class="editor-form">@Html.AntiForgeryToken()<div asp-validation-summary="All" class="form-errors" role="alert"></div>
+    <div class="form-grid"><label>Турнір<select asp-for="TournamentId" asp-items="@(new SelectList(tournaments.Select(t => new { t.Id, Name = $"{t.Name} {t.Season}" }), "Id", "Name"))"><option value="">Оберіть турнір</option></select></label><label>Код матчу<input asp-for="Code" maxlength="12" placeholder="U1" /></label><label>Сітка<select asp-for="Lane"><option value="groups">Групи</option><option value="upper">Верхня</option><option value="lower">Нижня</option><option value="final">Фінал</option></select></label><label>Назва етапу<input asp-for="Label" /></label><label>Раунд<input asp-for="Round" type="number" min="1" max="8" /></label><label>Позиція в раунді<input asp-for="Slot" type="number" min="1" max="16" /></label>
+        <div class="autocomplete-field"><label for="team-a-query">Команда A</label><input id="team-a-query" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="team-a-options" data-team-autocomplete data-hidden="TeamAId" autocomplete="off" placeholder="Введіть 3 символи" value="@(teams.FirstOrDefault(t => t.Id == Model.TeamAId)?.Name)" /><input asp-for="TeamAId" type="hidden" /><div id="team-a-options" class="autocomplete-options" role="listbox" hidden></div></div>
+        <div class="autocomplete-field"><label for="team-b-query">Команда B</label><input id="team-b-query" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="team-b-options" data-team-autocomplete data-hidden="TeamBId" autocomplete="off" placeholder="Введіть 3 символи" value="@(teams.FirstOrDefault(t => t.Id == Model.TeamBId)?.Name)" /><input asp-for="TeamBId" type="hidden" /><div id="team-b-options" class="autocomplete-options" role="listbox" hidden></div></div>
+        <label>Рахунок A<input asp-for="ScoreA" type="number" min="0" max="5" /></label><label>Рахунок B<input asp-for="ScoreB" type="number" min="0" max="5" /></label><label>Формат<select asp-for="BestOf"><option value="3">BO3</option><option value="5">BO5</option></select></label><label>Дата матчу<input asp-for="MatchDate" type="date" /></label><label>Наступний для переможця<input asp-for="NextWinCode" /></label><label>Наступний після поразки<input asp-for="NextLossCode" /></label></div>
+    <p class="form-help">Для майбутньої гри залиште обидва рахунки порожніми. Вибрані команди мають належати турніру.</p><div class="form-actions"><button type="submit">Зберегти матч</button><a href="/studio">Скасувати</a></div>
+</form></main><footer class="detail-footer">Circuit · локальний редактор</footer></div>
+@section Scripts {
+    <script src="~/js/jquery.min.js"></script>
+    <script src="~/js/team-autocomplete.js" asp-append-version="true"></script>
+}

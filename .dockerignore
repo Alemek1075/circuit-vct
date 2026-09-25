@@ -1,0 +1,12 @@
+**/bin
+**/obj
+**/data
+.git
+node_modules
+tests
+tools/.fontpacks
+playwright-report
+test-results
+*.db
+*.db-shm
+*.db-wal

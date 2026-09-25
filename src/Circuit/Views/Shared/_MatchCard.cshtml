@@ -1,0 +1,25 @@
+@model Circuit.Models.Match
+@{
+    var played = Model.IsPlayed;
+    var teamAWin = played && Model.WinnerId == Model.TeamAId;
+    var teamBWin = played && Model.WinnerId == Model.TeamBId;
+    var nameA = Model.TeamA?.Name ?? "Очікується";
+    var nameB = Model.TeamB?.Name ?? "Очікується";
+}
+<a class="match-card" href="/match/@Model.Id" data-match-code="@Model.Code" data-next-win="@Model.NextWinCode"
+   data-team-a="@Model.TeamAId" data-team-b="@Model.TeamBId"
+   aria-label="@Model.Label: @nameA @(played ? Model.ScoreA : "без рахунку") — @nameB @(played ? Model.ScoreB : "без рахунку")">
+    <span class="match-card__meta"><span>@Model.Code</span><span>BO@(Model.BestOf)</span></span>
+    <span class="match-team @(teamAWin ? "is-winner" : "")">
+        @if (Model.TeamA?.MarkUrl is not null) { <img src="@Model.TeamA.MarkUrl" alt="" width="30" height="30" loading="lazy" /> }
+        else { <span class="mark-empty" aria-hidden="true">?</span> }
+        <span class="match-team__name">@(Model.TeamA?.ShortName ?? "TBD")</span>
+        <span class="match-team__score">@(played ? Model.ScoreA : "—")</span>
+    </span>
+    <span class="match-team @(teamBWin ? "is-winner" : "")">
+        @if (Model.TeamB?.MarkUrl is not null) { <img src="@Model.TeamB.MarkUrl" alt="" width="30" height="30" loading="lazy" /> }
+        else { <span class="mark-empty" aria-hidden="true">?</span> }
+        <span class="match-team__name">@(Model.TeamB?.ShortName ?? "TBD")</span>
+        <span class="match-team__score">@(played ? Model.ScoreB : "—")</span>
+    </span>
+</a>

@@ -1,0 +1,15 @@
+@model Circuit.ViewModels.TeamPageModel
+@{
+    var team = Model.Team;
+    ViewData["Title"] = $"{team.Name} · {team.Tournament.Name}";
+}
+<div class="detail-layout">
+    <header class="detail-header"><a href="/" class="detail-header__brand">CIRCUIT<span>/</span></a><a href="/?tournament=@team.Tournament.Slug&team=@team.Id#bracket">← Шлях команди в сітці</a></header>
+    <main class="detail-main">
+        <p class="detail-kicker">@team.Tournament.Name.ToUpperInvariant() / @team.Region.ToUpperInvariant()</p>
+        <h1>@team.Name</h1>
+        <div class="team-summary"><img src="@team.MarkUrl" alt="" width="72" height="72" /><div><span>КОМАНДА</span><strong>@team.ShortName</strong></div><div><span>РЕГІОН</span><strong>@team.Region</strong></div><div><span>МІСЦЕ</span><strong>@(team.Placement?.ToString() ?? "У процесі")</strong></div></div>
+        <section class="detail-section"><h2>Матчі команди</h2><div class="detail-links">@foreach (var match in Model.Matches) { <a href="/match/@match.Id"><span>@match.Code · @match.TeamA?.ShortName — @match.TeamB?.ShortName</span><span>@(match.IsPlayed ? $"{match.ScoreA}:{match.ScoreB}" : "без рахунку") ↗</span></a> }</div></section>
+    </main>
+    <footer class="detail-footer">Неофіційний навчальний проєкт · <a href="@team.Tournament.SourceUrl" target="_blank" rel="noopener noreferrer">Джерело турніру ↗</a></footer>
+</div>

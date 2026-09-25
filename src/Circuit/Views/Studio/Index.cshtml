@@ -1,0 +1,26 @@
+@using Circuit.Models
+@{
+    ViewData["Title"] = "Редактор";
+    var tournaments = (IReadOnlyList<Tournament>)ViewBag.Tournaments;
+    var teams = (IReadOnlyList<Team>)ViewBag.Teams;
+    var matches = (IReadOnlyList<Match>)ViewBag.Matches;
+}
+<div class="detail-layout studio-layout">
+    <header class="detail-header"><a href="/" class="detail-header__brand">CIRCUIT<span>/</span></a><a href="/">← Публічна сторінка</a></header>
+    <main class="studio-main">
+        <p class="detail-kicker">ЛОКАЛЬНИЙ РЕЖИМ / РЕДАГУВАННЯ</p>
+        <h1>Редактор даних</h1>
+        <p class="studio-lead">Зміни записуються в локальну SQLite базу. Редактор доступний лише в режимі розробки.</p>
+        @if (ViewBag.Notice is string notice) { <p class="studio-notice" role="status">@notice</p> }
+        <section class="studio-section"><div class="studio-section__head"><h2>Турніри <span>@tournaments.Count</span></h2><a href="/studio/tournaments/new">Створити турнір ↗</a></div>
+            @foreach (var item in tournaments) { <div class="studio-row"><span class="studio-row__code">@item.Season</span><span><strong>@item.Name</strong><small>@item.City · @item.Slug</small></span><a href="/studio/tournaments/@item.Id">Змінити</a><form method="post" action="/studio/tournaments/@item.Id/delete">@Html.AntiForgeryToken()<button type="submit" class="delete-button" aria-label="Видалити турнір @item.Name">Видалити</button></form></div> }
+        </section>
+        <section class="studio-section"><div class="studio-section__head"><h2>Команди <span>@teams.Count</span></h2><a href="/studio/teams/new">Додати команду ↗</a></div>
+            @foreach (var item in teams) { <div class="studio-row"><span class="studio-row__code">@item.ShortName</span><span><strong>@item.Name</strong><small>@item.Tournament.Name @item.Tournament.Season · @item.Region</small></span><a href="/studio/teams/@item.Id">Змінити</a><form method="post" action="/studio/teams/@item.Id/delete">@Html.AntiForgeryToken()<button type="submit" class="delete-button" aria-label="Видалити команду @item.Name">Видалити</button></form></div> }
+        </section>
+        <section class="studio-section"><div class="studio-section__head"><h2>Матчі <span>@matches.Count</span></h2><a href="/studio/matches/new">Додати матч ↗</a></div>
+            @foreach (var item in matches) { <div class="studio-row"><span class="studio-row__code">@item.Code</span><span><strong>@item.TeamA?.ShortName — @item.TeamB?.ShortName</strong><small>@item.Tournament.Name @item.Tournament.Season · @(item.IsPlayed ? $"{item.ScoreA}:{item.ScoreB}" : "без рахунку")</small></span><a href="/studio/matches/@item.Id">Змінити</a><form method="post" action="/studio/matches/@item.Id/delete">@Html.AntiForgeryToken()<button type="submit" class="delete-button" aria-label="Видалити матч @item.Code">Видалити</button></form></div> }
+        </section>
+    </main>
+    <footer class="detail-footer">Circuit · локальний редактор</footer>
+</div>
